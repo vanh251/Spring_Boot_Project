@@ -34,9 +34,6 @@ public class User {
     @Column(length = 15)
     private String phoneNumber;
 
-    @Column(length = 255)
-    private String address;
-
     @Column(name = "is_active")
     private boolean status = true;
 
