@@ -1,4 +1,4 @@
-package va.project.dto;
+package va.project.dto.request;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -13,7 +13,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-public class RegisterRequestDto {
+public class RegisterRequest {
     @NotBlank(message = "Tên đăng nhập không được để trống")
     @Size(min = 4, max = 50, message = "Tên đăng nhập phải từ 4 đến 50 ký tự")
     @Pattern(regexp = "^[a-zA-Z0-9]+$", message = "Tên đăng nhập chỉ được chứa chữ cái và số")

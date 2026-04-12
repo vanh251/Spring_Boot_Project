@@ -1,4 +1,4 @@
-package va.project.dto;
+package va.project.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
@@ -10,7 +10,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-public class LoginRequestDto {
+public class LoginRequest {
     @NotBlank(message = "Tên đăng nhập không được để trống")
     private String username;
 
