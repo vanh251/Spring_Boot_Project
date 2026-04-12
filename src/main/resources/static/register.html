@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Đăng ký tài khoản</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="css/register.css" />
+</head>
+
+<body>
+
+    <div class="card">
+        <div class="card-header">
+            <h1>Tạo tài khoản</h1>
+            <p>Điền đầy đủ thông tin để đăng ký</p>
+        </div>
+
+        <form id="registerForm" novalidate>
+            <div class="form-group">
+                <label for="username">Tên đăng nhập</label>
+                <input type="text" id="username" name="username" placeholder="Ít nhất 4 ký tự, chỉ chữ và số" />
+                <div class="field-error" id="err-username"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Mật khẩu</label>
+                <input type="password" id="password" name="password" placeholder="Chứa hoa, thường và số" />
+                <div class="field-error" id="err-password"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="fullName">Họ và tên</label>
+                <input type="text" id="fullName" name="fullName" placeholder="Nguyễn Văn A" />
+                <div class="field-error" id="err-fullName"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" placeholder="example@email.com" />
+                <div class="field-error" id="err-email"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="phone">Số điện thoại</label>
+                <input type="tel" id="phone" name="phone" placeholder="0xxxxxxxxx" />
+                <div class="field-error" id="err-phone"></div>
+            </div>
+
+            <button type="submit" id="submitBtn">
+                <span id="btnText">Đăng ký</span>
+                <div class="spinner" id="spinner"></div>
+            </button>
+
+            <div class="toast" id="toast"></div>
+        </form>
+
+        <div class="login-link">
+            Đã có tài khoản? <a href="/login.html">Đăng nhập ngay</a>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = '/api/v1/auth/register';
+
+        const form = document.getElementById('registerForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const btnText = document.getElementById('btnText');
+        const spinner = document.getElementById('spinner');
+        const toast = document.getElementById('toast');
+
+        const fields = ['username', 'password', 'fullName', 'email', 'phone'];
+
+        function clearErrors() {
+            fields.forEach(f => {
+                document.getElementById('err-' + f).textContent = '';
+                document.getElementById(f).style.borderColor = '';
+            });
+            toast.style.display = 'none';
+            toast.className = 'toast';
+        }
+
+        function showFieldError(field, msg) {
+            const errEl = document.getElementById('err-' + field);
+            const inputEl = document.getElementById(field);
+            if (errEl) errEl.textContent = msg;
+            if (inputEl) inputEl.style.borderColor = '#f87171';
+        }
+
+        function showToast(msg, type) {
+            toast.textContent = msg;
+            toast.className = 'toast ' + type;
+            toast.style.display = 'block';
+        }
+
+        function setLoading(loading) {
+            submitBtn.disabled = loading;
+            btnText.style.display = loading ? 'none' : 'inline';
+            spinner.style.display = loading ? 'block' : 'none';
+        }
+
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            clearErrors();
+
+            const body = {
+                username: document.getElementById('username').value.trim(),
+                password: document.getElementById('password').value,
+                fullName: document.getElementById('fullName').value.trim(),
+                email: document.getElementById('email').value.trim(),
+                phone: document.getElementById('phone').value.trim(),
+            };
+
+            setLoading(true);
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body),
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showToast('🎉 Đăng ký thành công! Chào mừng ' + data.username, 'success');
+                    form.reset();
+                } else if (response.status === 400) {
+                    Object.entries(data).forEach(([field, msg]) => {
+                        showFieldError(field, msg);
+                    });
+                    showToast('Vui lòng kiểm tra lại thông tin.', 'error');
+                } else if (response.status === 409) {
+                    showToast('⚠️ ' + data.error, 'error');
+                } else {
+                    showToast('Có lỗi xảy ra: ' + (data.error || 'Không xác định'), 'error');
+                }
+            } catch (err) {
+                showToast('Không thể kết nối đến máy chủ. Hãy thử lại sau.', 'error');
+                console.error(err);
+            } finally {
+                setLoading(false);
+            }
+        });
+    </script>
+</body>
+
+</html>
