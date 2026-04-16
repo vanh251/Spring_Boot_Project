@@ -125,7 +125,7 @@
                 const data = await response.json();
 
                 if (response.ok) {
-                    showToast('🎉 Đăng ký thành công! Chào mừng ' + data.username, 'success');
+                    showToast(' Đăng ký thành công! Chào mừng ' + data.username, 'success');
                     form.reset();
                 } else if (response.status === 400) {
                     Object.entries(data).forEach(([field, msg]) => {
@@ -133,7 +133,7 @@
                     });
                     showToast('Vui lòng kiểm tra lại thông tin.', 'error');
                 } else if (response.status === 409) {
-                    showToast('⚠️ ' + data.error, 'error');
+                    showToast(  data.error, 'error');
                 } else {
                     showToast('Có lỗi xảy ra: ' + (data.error || 'Không xác định'), 'error');
                 }

@@ -13,8 +13,9 @@ import va.project.mapper.RegisterMapper;
 import va.project.repository.RoleRepository;
 import va.project.repository.UserRepository;
 import va.project.exception.ResourceAlreadyExistsException;
-
+import va.project.dto.response.UserResponse;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Service
@@ -44,5 +45,41 @@ public class UserService {
         user.setRoleSet(roles);
         userRepository.save(user);
         return RegisterMapper.mapToResponse(user);
+    }
+
+    @Transactional(readOnly = true)
+    public UserResponse getUserByUsername(String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Tài khoản không tồn tại!"));
+
+        List<String> roles = user.getRoleSet().stream()
+                .map(role -> role.getRoleName().name())
+                .toList();
+
+        return UserResponse.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .fullName(user.getFullName())
+                .email(user.getEmail())
+                .phoneNumber(user.getPhoneNumber())
+                .roles(roles)
+                .build();
+    }
+
+    @Transactional(readOnly = true)
+    public List<UserResponse> getAllUsers() {
+        return userRepository.findAll().stream().map(user -> {
+            List<String> userRoles = user.getRoleSet().stream()
+                    .map(role -> role.getRoleName().name())
+                    .toList();
+            return UserResponse.builder()
+                    .id(user.getId())
+                    .username(user.getUsername())
+                    .fullName(user.getFullName())
+                    .email(user.getEmail())
+                    .phoneNumber(user.getPhoneNumber())
+                    .roles(userRoles)
+                    .build();
+        }).toList();
     }
 }

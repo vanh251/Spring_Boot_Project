@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng nhập hệ thống</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/login.css">
+</head>
+<body>
+    <!-- Nền động Gradient Balls -->
+    <div class="background-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+    </div>
+
+    <!-- Khối thẻ kính (Glassmorphism) -->
+    <div class="card">
+        <div class="card-header">
+            <h1>Đăng nhập</h1>
+            <p>Mừng bạn trở lại với hệ thống</p>
+        </div>
+
+        <form id="loginForm" novalidate>
+            <div class="form-group">
+                <label for="username">Tên đăng nhập</label>
+                <input type="text" id="username" name="username" placeholder="Nhập tên đăng nhập" autocomplete="username">
+                <div class="field-error" id="err-username"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Mật khẩu</label>
+                <input type="password" id="password" name="password" placeholder="Nhập mật khẩu" autocomplete="current-password">
+                <div class="field-error" id="err-password"></div>
+            </div>
+
+            <div class="form-options">
+                <label class="remember-me">
+                    <input type="checkbox" id="remember">
+                    <span>Ghi nhớ tôi</span>
+                </label>
+                <a href="#" class="forgot-password">Quên mật khẩu?</a>
+            </div>
+
+            <button type="submit" id="submitBtn">
+                <span id="btnText">Đăng nhập</span>
+                <div class="spinner" id="spinner"></div>
+            </button>
+
+            <div class="toast" id="toast"></div>
+        </form>
+
+        <div class="register-link">
+            Chưa có tài khoản? <a href="/register.html">Đăng ký ngay</a>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = '/api/v1/auth/login';
+
+        const form = document.getElementById('loginForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const btnText = document.getElementById('btnText');
+        const spinner = document.getElementById('spinner');
+        const toast = document.getElementById('toast');
+        const usernameEl = document.getElementById('username');
+        const passwordEl = document.getElementById('password');
+
+        function clearErrors() {
+            document.getElementById('err-username').textContent = '';
+            document.getElementById('err-password').textContent = '';
+            usernameEl.style.borderColor = '';
+            passwordEl.style.borderColor = '';
+            toast.style.display = 'none';
+            toast.className = 'toast';
+        }
+
+        function showFieldError(field, msg) {
+            const errEl = document.getElementById('err-' + field);
+            const inputEl = document.getElementById(field);
+            if (errEl) errEl.textContent = msg;
+            if (inputEl) inputEl.style.borderColor = '#ff4b4b'; // Red border
+        }
+
+        function showToast(msg, type) {
+            toast.textContent = msg;
+            toast.className = 'toast ' + type;
+            toast.style.display = 'block';
+        }
+
+        function setLoading(loading) {
+            submitBtn.disabled = loading;
+            btnText.style.transform = loading ? 'translateY(-20px)' : 'translateY(0)';
+            btnText.style.opacity = loading ? '0' : '1';
+            spinner.style.display = loading ? 'block' : 'none';
+            if (loading) {
+                submitBtn.classList.add('loading');
+            } else {
+                submitBtn.classList.remove('loading');
+            }
+        }
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            clearErrors();
+
+            const username = usernameEl.value.trim();
+            const password = passwordEl.value;
+            
+            let hasError = false;
+            // Validate sơ bộ
+            if(!username) {
+                showFieldError('username', 'Tên đăng nhập không được để trống');
+                hasError = true;
+            }
+            if(!password) {
+                showFieldError('password', 'Mật khẩu không được để trống');
+                hasError = true;
+            }
+            if(hasError) return;
+
+            const body = { username, password };
+            setLoading(true);
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body),
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showToast(' Đăng nhập thành công!', 'success');
+                    // Lưu trữ token sau khi đăng nhập thành công
+                    localStorage.setItem('accessToken', data.token);
+                    localStorage.setItem('refreshToken', data.refreshToken);
+                    localStorage.setItem('username', data.username);
+                    localStorage.setItem('role', data.role);
+                    
+                    form.reset();
+                    setTimeout(() => {
+                        window.location.href = '/index.html';
+                    }, 1500);
+                } else if (response.status === 401 || response.status === 403 || response.status === 404) {
+                    showToast( data.error, 'error');
+                } else if (response.status === 400) {
+                    Object.entries(data).forEach(([field, msg]) => {
+                        showFieldError(field, msg);
+                    });
+                    showToast('Vui lòng kiểm tra lại thông tin.', 'error');
+                } else {
+                    showToast('Có lỗi xảy ra: ' + (data.error || 'Lỗi server'), 'error');
+                }
+            } catch (err) {
+                showToast('Không thể kết nối đến máy chủ. Hãy thử lại.', 'error');
+                console.error(err);
+            } finally {
+                setLoading(false);
+            }
+        });
+    </script>
+</body>
+</html>

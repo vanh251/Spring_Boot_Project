@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trang Chủ - Hệ Thống TTCS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/index.css">
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <a href="/" class="nav-brand">TTCS</a>
+        
+        <div class="nav-menu">
+
+            <!-- Menu bảo mật Admin -->
+            <a href="#" class="nav-link admin-menu" id="adminMenu">Quản trị hệ thống </a>
+
+            <!-- Trạng thái chưa đăng nhập -->
+            <a href="/login.html" class="btn btn-primary unauth-only" id="loginBtn">Đăng Nhập</a>
+
+            <!-- Trạng thái đã đăng nhập -->
+            <div class="user-greeting auth-only" id="userGreeting">
+                Chào, <span id="usernameDisplay">Khách</span>!
+            </div>
+            <button class="btn btn-logout auth-only" id="logoutBtn">Đăng Xuất</button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="hero">
+        <h1>Khám Phá Chức Năng Đăng Kí, Đăng Nhập</h1>
+        <p>Hệ thống học tập và trải nghiệm sản phẩm tốt nhất. Thông tin của bạn được bảo vệ qua hệ thống xác thực JWT an toàn kết hợp với cơ chế Phơi Bày Quyền Hạn Động.</p>
+        
+        <div class="unauth-only" id="heroUnauth">
+            <a href="/register.html" class="btn btn-primary" style="padding: 14px 32px; font-size: 18px;">Hãy Bắt Đầu Ngay</a>
+        </div>
+
+        <div class="auth-only" id="heroAuth">
+            <div style="background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(255, 255, 255, 0.1); padding: 24px; border-radius: 16px; text-align: left; max-width: 600px; margin: 0 auto; margin-bottom: 30px;">
+                <h3 style="color: white; margin-bottom: 12px;">📊 Thông tin cá nhân lấy từ Server:</h3>
+                <p><strong>ID:</strong> <span id="profileId">...</span></p>
+                <p><strong>Họ Tên:</strong> <span id="profileName">...</span></p>
+                <p><strong>Email:</strong> <span id="profileEmail">...</span></p>
+                <p><strong>Vai Trò:</strong> <span id="profileRole" style="color: #60a5fa;">...</span></p>
+            </div>
+        </div>
+
+        <!-- Bảng quản trị viên (Ẩn mặc định) -->
+        <div id="adminUsersSection" style="display: none; width: 100%; max-width: 800px; margin: 0 auto; background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(255, 255, 255, 0.1); padding: 24px; border-radius: 16px; text-align: left;">
+            <h3 style="color: #fca5a5; margin-bottom: 16px;">🔑 Bảng Quản Trị: Danh sách người dùng</h3>
+            <div style="overflow-x: auto;">
+                <table id="usersTable" style="width: 100%; border-collapse: collapse; color: #e2e8f0; font-size: 15px;">
+                    <thead>
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.1); text-align: left; color: #a78bfa;">
+                            <th style="padding: 12px;">Tên đăng nhập</th>
+                            <th style="padding: 12px;">Họ tên</th>
+                            <th style="padding: 12px;">Email</th>
+                            <th style="padding: 12px;">Vai trò</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Data fetched from Server appended here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const token = localStorage.getItem('accessToken');
+            const refreshToken = localStorage.getItem('refreshToken');
+
+            const unauthElements = document.querySelectorAll('.unauth-only');
+            const authElements = document.querySelectorAll('.auth-only');
+            const adminMenu = document.getElementById('adminMenu');
+
+            // Hàm thay đổi trạng thái UI
+            const updateUI = (isAuthenticated, userDetails = null) => {
+                unauthElements.forEach(el => el.style.display = isAuthenticated ? 'none' : 'block');
+                authElements.forEach(el => el.style.display = isAuthenticated ? 'block' : 'none');
+                
+                if(isAuthenticated && userDetails) {
+                    document.getElementById('usernameDisplay').textContent = userDetails.username;
+                    
+                    // Điền vào bảng Profile
+                    document.getElementById('profileId').textContent = userDetails.id || 'N/A';
+                    document.getElementById('profileName').textContent = userDetails.fullName || 'N/A';
+                    document.getElementById('profileEmail').textContent = userDetails.email || 'N/A';
+                    document.getElementById('profileRole').textContent = userDetails.roles.join(', ');
+
+                    // RBAC - Kiểm tra quyềm Admin
+                    const checkAdmin = userDetails.roles.some(role => role === 'ADMIN' || role === 'ROLE_ADMIN');
+                    if(checkAdmin) {
+                        adminMenu.style.display = 'block';
+                        document.getElementById('adminUsersSection').style.display = 'block';
+                        fetchAdminUsersData(token);
+                    }
+                }
+            };
+
+            const fetchAdminUsersData = (accessToken) => {
+                fetch('/api/v1/admin/users', {
+                    headers: { 'Authorization': 'Bearer ' + accessToken }
+                })
+                .then(res => res.json())
+                .then(users => {
+                    const tbody = document.querySelector('#usersTable tbody');
+                    tbody.innerHTML = '';
+                    users.forEach(u => {
+                        const tr = document.createElement('tr');
+                        tr.style.borderBottom = "1px solid rgba(255,255,255,0.05)";
+                        tr.innerHTML = `
+                            <td style="padding: 12px;">${u.username}</td>
+                            <td style="padding: 12px;">${u.fullName || '<i>Chưa cập nhật</i>'}</td>
+                            <td style="padding: 12px;">${u.email || '<i>Chưa cập nhật</i>'}</td>
+                            <td style="padding: 12px; color: ${u.roles.includes('ROLE_ADMIN') ? '#fca5a5' : '#60a5fa'}; font-weight: 600;">
+                                ${u.roles.join(', ')}
+                            </td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                })
+                .catch(err => console.error("Error fetching admin users", err));
+            };
+
+            // Nếu không có token -> Hủy
+            if(!token) {
+                updateUI(false);
+            } else {
+                // Có token -> Gọi API thông tin
+                fetch('/api/v1/user/me', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                })
+                .then(res => {
+                    if(!res.ok) {
+                        throw new Error("Token invalid or expired");
+                    }
+                    return res.json();
+                })
+                .then(data => {
+                    updateUI(true, data); // API trả về UserResponse
+                })
+                .catch(err => {
+                    console.error("Authentication failed:", err);
+                    // Token vô hiệu lực -> Clear storage -> Quay về Guest
+                    localStorage.removeItem('accessToken');
+                    localStorage.removeItem('refreshToken');
+                    localStorage.removeItem('username');
+                    localStorage.removeItem('role');
+                    updateUI(false);
+                });
+            }
+
+            // Xử lý nút Đăng Xuất
+            document.getElementById('logoutBtn').addEventListener('click', () => {
+                if(refreshToken) {
+                    // Gọi API thu hồi Refresh Token ở Server
+                    fetch('/api/v1/auth/logout', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ refreshToken: refreshToken })
+                    }).catch(console.error);
+                }
+
+                // Luôn xóa localStorage ở Client
+                localStorage.clear();
+                window.location.href = '/login.html';
+            });
+        });
+    </script>
+</body>
+</html>
