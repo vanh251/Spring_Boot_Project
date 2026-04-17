@@ -32,7 +32,7 @@
     <!-- Main Content -->
     <main class="hero">
         <h1>Khám Phá Chức Năng Đăng Kí, Đăng Nhập</h1>
-        <p>Hệ thống học tập và trải nghiệm sản phẩm tốt nhất. Thông tin của bạn được bảo vệ qua hệ thống xác thực JWT an toàn kết hợp với cơ chế Phơi Bày Quyền Hạn Động.</p>
+        <p>Thông tin được bảo vệ qua hệ thống xác thực JWT an toàn kết hợp với cơ chế phân quyền</p>
         
         <div class="unauth-only" id="heroUnauth">
             <a href="/register.html" class="btn btn-primary" style="padding: 14px 32px; font-size: 18px;">Hãy Bắt Đầu Ngay</a>
@@ -40,7 +40,7 @@
 
         <div class="auth-only" id="heroAuth">
             <div style="background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(255, 255, 255, 0.1); padding: 24px; border-radius: 16px; text-align: left; max-width: 600px; margin: 0 auto; margin-bottom: 30px;">
-                <h3 style="color: white; margin-bottom: 12px;">📊 Thông tin cá nhân lấy từ Server:</h3>
+                <h3 style="color: white; margin-bottom: 12px;"> Thông tin cá nhân lấy từ Server:</h3>
                 <p><strong>ID:</strong> <span id="profileId">...</span></p>
                 <p><strong>Họ Tên:</strong> <span id="profileName">...</span></p>
                 <p><strong>Email:</strong> <span id="profileEmail">...</span></p>
@@ -50,7 +50,7 @@
 
         <!-- Bảng quản trị viên (Ẩn mặc định) -->
         <div id="adminUsersSection" style="display: none; width: 100%; max-width: 800px; margin: 0 auto; background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(255, 255, 255, 0.1); padding: 24px; border-radius: 16px; text-align: left;">
-            <h3 style="color: #fca5a5; margin-bottom: 16px;">🔑 Bảng Quản Trị: Danh sách người dùng</h3>
+            <h3 style="color: #fca5a5; margin-bottom: 16px;"> Bảng Quản Trị: Danh sách người dùng</h3>
             <div style="overflow-x: auto;">
                 <table id="usersTable" style="width: 100%; border-collapse: collapse; color: #e2e8f0; font-size: 15px;">
                     <thead>
