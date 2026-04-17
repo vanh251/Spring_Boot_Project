@@ -20,7 +20,7 @@
 - **Dynamic UI:** Giao diện thay đổi linh hoạt theo trạng thái (chưa đăng nhập/đã đăng nhập) và theo vai trò (hiển thị menu Admin cho người có quyền).
 - Tương tác với backend thông qua `Fetch API` và quản lý token bằng `localStorage`.
 
-## 🛠 Công nghệ sử dụng
+## Công nghệ sử dụng
 
 - **Backend:** Java 17+, Spring Boot, Spring Security, Spring Data JPA, Hibernate.
 - **Database:** MySQL / PostgreSQL (Tùy cấu hình).
@@ -47,7 +47,7 @@ src/
 │           └── css/         # Thư mục chứa các file CSS (index.css, login.css...)
 ```
 
-## 🔗 Các API Endpoints chính
+## Các API Endpoints chính
 
 | Method | Endpoint                 | Mô tả                                      | Yêu cầu Auth |
 |--------|--------------------------|--------------------------------------------|--------------|
@@ -57,7 +57,7 @@ src/
 | GET    | `/api/v1/user/me`        | Lấy thông tin cá nhân của người dùng       | Có           |
 | GET    | `/api/v1/admin/users`    | Lấy danh sách toàn bộ người dùng           | Có (Admin)   |
 
-## ⚙️ Hướng dẫn cài đặt và chạy dự án
+## Hướng dẫn cài đặt và chạy dự án
 
 1. **Clone repository:**
    ```bash
@@ -78,6 +78,6 @@ src/
    - Ứng dụng sẽ chạy tại: `http://localhost:8080/`
    - Giao diện Frontend được load mặc định ở trang chủ (`index.html`).
 
-## ✍️ Tác giả
+##  Tác giả
 - Phát triển bởi: Nguyễn Việt Anh
 - Dự án: TTCS (Thực Tập Cơ Sở)
